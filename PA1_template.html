@@ -78,17 +78,7 @@ img {
 <h2>Loading and preprocessing the data</h2>
 <p>The first thing a programmer should do is to load the needed libraries on the top of the file:</p>
 <pre class="r"><code>library(knitr)
-library(dplyr)</code></pre>
-<pre><code>## 
-## Attaching package: 'dplyr'
-## 
-## The following object is masked from 'package:stats':
-## 
-##     filter
-## 
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union</code></pre>
+suppressWarnings(suppressMessages(library(dplyr)))</code></pre>
 <ul>
 <li>Load the data (i.e. read.csv())</li>
 </ul>

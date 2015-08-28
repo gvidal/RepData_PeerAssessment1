@@ -1,9 +1,4 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 Hello! My name is Guillem, and I'm going to explain how I achieved the Reproducible Research: Peer Assessment 1. 
@@ -22,7 +17,8 @@ So, let's get started!
 
 The first thing a programmer should do is to load the needed libraries on the top of the file:
 
-```{r libraries, results="hide"}
+
+```r
 library(knitr)
 suppressWarnings(suppressMessages(library(dplyr)))
 ```
@@ -35,14 +31,16 @@ Also, I am going to cleanup the garbage data that's inside the table and format 
 
 Also, I store the original data to do analysis of the missing values.
 
-```{r, results="hide"}
+
+```r
 unzip("activity.zip")
 data <- read.csv("activity.csv")
 ```
 
 - Process/transform the data (if necessary) into a format suitable for your analysis
 
-```{r clean_data, results="hide"}
+
+```r
 activity <- data[complete.cases(data),]
 activity$date <- as.Date(activity$date, "%Y-%m-%d")
 ```
@@ -54,7 +52,8 @@ activity$date <- as.Date(activity$date, "%Y-%m-%d")
 - Calculate the total number of steps taken per day
 
 
-```{r number_of_steps, results='table'}
+
+```r
 total_steps <- sum(activity$steps)
 steps_per_day <- activity %>% 
                   group_by(date) %>% 
@@ -62,10 +61,22 @@ steps_per_day <- activity %>%
 knitr::kable(head(steps_per_day))
 ```
 
+
+
+date            sum
+-----------  ------
+2012-10-02      126
+2012-10-03    11352
+2012-10-04    12116
+2012-10-05    13294
+2012-10-06    15420
+2012-10-07    11015
+
 - So, the histogram, with the mean and the median should look like this:
 
 
-```{r histogram_steps, results='asis'}
+
+```r
 steps_per_day <- steps_per_day$sum
 mean_steps_per_day <- mean(steps_per_day)
 median_steps_per_day <- median(steps_per_day)
@@ -82,8 +93,9 @@ abline(v=median_steps_per_day,col="blue")
 text(median_steps_per_day,18, labels="Median steps per day", 
                               pos=4, 
                               col="blue")
-
 ```
+
+![](PA1_template_files/figure-html/histogram_steps-1.png) 
 
 As we can see, the mean and the median are quite the same.
 
@@ -91,7 +103,8 @@ As we can see, the mean and the median are quite the same.
 
 - Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
-```{r, results='asis'}
+
+```r
 #Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 interval <- activity %>% 
               group_by(interval) %>% 
@@ -104,28 +117,41 @@ plot(interval_steps_mean, type="l",
                           ylab="Average of steps")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
+
 - Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
 
-```{r}
+
+```r
   which.max(interval_steps_mean)
+```
+
+```
+## [1] 104
 ```
 
 ## Imputing missing values
 
 - Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
 
-```{r}
+
+```r
   MissingVal <- data %>% mutate(valueMissing = complete.cases(date,interval,steps))
   MissingVal$date <- as.Date(MissingVal$date, "%Y-%m-%d")
   nrow(subset(MissingVal, valueMissing == FALSE))
+```
+
+```
+## [1] 2304
 ```
 
 - Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
 
 What I am going to do, is calculate the mean of the same interval per missing row value, apply the result and rounding it.
 
-```{r, results="hide"}
+
+```r
   for (row in 1:nrow(MissingVal)){
      row_interval <- MissingVal[row,3]
      row_date <- MissingVal[row,2]
@@ -142,7 +168,8 @@ What I am going to do, is calculate the mean of the same interval per missing ro
 According to the following histogram, it does not seem to differ from the original dataset.
 
 
-```{r, results='asis'}
+
+```r
 new_steps_by_date = MissingVal %>% 
                   group_by(date) %>%
                   summarize(sum = sum(steps))
@@ -182,14 +209,16 @@ text(median_steps_per_day,18, labels="Median steps per day",
                               col="blue")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
+
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
 - Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
 
-```{r}
 
+```r
 activity$date <- as.Date(strptime(activity$date, format="%Y-%m-%d"))
 activity$day <- weekdays(activity$date)
 wdays = activity %>% 
@@ -199,12 +228,12 @@ wdays = activity %>%
                                 "weekend", "weekday")) %>%
           group_by(interval,day) %>%
           summarize(mean=mean(steps))
-          
 ```
 
 - Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
 
-```{r, results='asis'}
+
+```r
 weekend_days_mean <- wdays[wdays$day %in% c("weekend"),]$mean
 weekday_days_mean <- wdays[wdays$day %in% c("weekday"),]$mean
 plot(weekend_days_mean,   type="l",  
@@ -215,3 +244,5 @@ plot(weekend_days_mean,   type="l",
 lines(weekday_days_mean,col="green")
 legend("topright", lty=c(1,1), col = c("blue", "green"), legend = c("weekday", "weekend"), seg.len=3)
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png) 
